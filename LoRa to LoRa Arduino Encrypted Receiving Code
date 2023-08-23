@@ -1,0 +1,56 @@
+#include <LoRa.h>
+#include <AESLib.h>
+
+// Set the AES key (128-bit)
+byte aesKey[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                 0x08, 0x09 ,OxEE,OxDD,OxCC};
+
+void setup() {
+    // Initialize Serial communication
+    Serial.begin(9600);
+    
+    // Initialize LoRa module
+    while (!Serial);
+    Serial.println("LoRA Receiver");
+    
+    if (!LoRa.begin(433E6)) {
+        Serial.println("Starting LoRA failed!");
+        while (1);
+    }
+  
+   // Set spreading factor and bandwidth
+   LoRa.setSpreadingFactor(12);
+   LoRa.setSignalBandwidth(125000);
+
+   // Enable CRC checking
+   LoRA.enableCrc();
+}
+
+void loop() {
+   
+   if (LoRA.available()) {
+      byte receivedData[16];
+      int packetSize = loRAS.readBytes(receivedData,sizeof(receivedData));
+
+     // Decrypt received data using AES decryption algorithm 
+       AES aesDecryptor(aesKey);                                      
+       aesDecryptor.decryptBlock(receivedData);
+
+     // Process decrypted data here
+      
+         String receivedText="";
+          for(int i=packetSize;i>=1;i--){
+             char c;
+             c=(char)receivedData[i-1];
+              receivedText+=c;
+            }   
+
+           Serial.print("Received Data: ");
+           Serial.println(receivedText);
+
+     
+       
+         
+         
+
+}
